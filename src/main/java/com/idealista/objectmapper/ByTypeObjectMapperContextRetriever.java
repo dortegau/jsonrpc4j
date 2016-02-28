@@ -1,4 +1,4 @@
-package com.idealista.jsonrpc4j.objectmapper;
+package com.idealista.objectmapper;
 
 import java.util.logging.Logger;
 

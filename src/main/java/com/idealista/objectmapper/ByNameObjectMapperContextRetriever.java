@@ -1,4 +1,4 @@
-package com.idealista.jsonrpc4j.objectmapper;
+package com.idealista.objectmapper;
 
 import org.springframework.context.ApplicationContext;
 

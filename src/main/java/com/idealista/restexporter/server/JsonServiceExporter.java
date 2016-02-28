@@ -1,28 +1,4 @@
-/*
-The MIT License (MIT)
-
-Copyright (c) 2014 jsonrpc4j
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
- */
-
-package com.idealista.jsonrpc4j.spring.server;
+package com.idealista.restexporter.server;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -38,33 +14,24 @@ import org.springframework.remoting.support.RemoteExporter;
 import org.springframework.web.HttpRequestHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.idealista.jsonrpc4j.ErrorResolver;
+import com.idealista.restexporter.ErrorResolver;
 import com.idealista.jsonrpc4j.InvocationListener;
-import com.idealista.jsonrpc4j.JsonRpcServer;
+import com.idealista.restexporter.RestServer;
 import com.idealista.objectmapper.ObjectMapperRetriever;
 
-/**
- * {@link RemoteExporter} that exports services using Json
- * according to the JSON-RPC proposal specified at:
- * <a href="http://groups.google.com/group/json-rpc">
- * http://groups.google.com/group/json-rpc</a>.
- *
- */
 public class JsonServiceExporter extends RemoteExporter implements InitializingBean, ApplicationContextAware, HttpRequestHandler {
 
 	private Level exceptionLogLevel = Level.WARNING;
 	
 	private ObjectMapper objectMapper;
 	
-	private JsonRpcServer jsonRpcServer;
+	private RestServer restServer;
 	
 	private ApplicationContext applicationContext;
 	
 	private ErrorResolver errorResolver;
 	
 	private InvocationListener invocationListener;
-	
-	private boolean backwardsCompatible = true;
 	
 	private boolean rethrowExceptions = false;
 	
@@ -82,10 +49,6 @@ public class JsonServiceExporter extends RemoteExporter implements InitializingB
 
 	public void setErrorResolver(ErrorResolver errorResolver) {
 		this.errorResolver = errorResolver;
-	}
-
-	public void setBackwardsComaptible(boolean backwardsCompatible) {
-		this.backwardsCompatible = backwardsCompatible;
 	}
 	
 	public void setRethrowExceptions(boolean rethrowExceptions) {
@@ -110,21 +73,20 @@ public class JsonServiceExporter extends RemoteExporter implements InitializingB
 
 	public void afterPropertiesSet() throws Exception {
 		this.objectMapper = retrieveObjectMapper();
-		this.jsonRpcServer = buildJsonRpcServer();
+		this.restServer = buildRestServer();
 	}
 
-	private JsonRpcServer buildJsonRpcServer() {
-		JsonRpcServer jsonRpcServer = new JsonRpcServer(objectMapper, getProxyForService(), getServiceInterface());
+	private RestServer buildRestServer() {
+		RestServer restServer = new RestServer(objectMapper, getProxyForService(), getServiceInterface());
 		
-		jsonRpcServer.setErrorResolver(errorResolver);
-		jsonRpcServer.setBackwardsCompatible(backwardsCompatible);
-		jsonRpcServer.setRethrowExceptions(rethrowExceptions);
-		jsonRpcServer.setAllowExtraParams(allowExtraParams);
-		jsonRpcServer.setAllowLessParams(allowLessParams);
-		jsonRpcServer.setExceptionLogLevel(exceptionLogLevel);
-        jsonRpcServer.setInvocationListener(invocationListener);
+		restServer.setErrorResolver(errorResolver);
+		restServer.setRethrowExceptions(rethrowExceptions);
+		restServer.setAllowExtraParams(allowExtraParams);
+		restServer.setAllowLessParams(allowLessParams);
+		restServer.setExceptionLogLevel(exceptionLogLevel);
+        restServer.setInvocationListener(invocationListener);
         
-        return jsonRpcServer;
+        return restServer;
 	}
 	
 	private ObjectMapper retrieveObjectMapper() {
@@ -133,7 +95,7 @@ public class JsonServiceExporter extends RemoteExporter implements InitializingB
 	}
 	
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		jsonRpcServer.handle(request, response);
+		restServer.handle(request, response);
 		response.getOutputStream().flush();
 	}
 }
