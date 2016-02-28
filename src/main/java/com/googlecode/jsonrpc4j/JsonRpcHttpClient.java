@@ -50,20 +50,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * A JSON-RPC client that uses the HTTP protocol.
  *
  */
-public class JsonRpcHttpClient
-	extends JsonRpcClient
-	implements IJsonRpcClient {
+public class JsonRpcHttpClient extends JsonRpcClient implements IJsonRpcClient {
 
-	public static final String JSONRPC_CONTENT_TYPE="application/json-rpc";
+	public static final String JSONRPC_CONTENT_TYPE = "application/json-rpc";
 
 	private URL serviceUrl;
 
-	private Proxy connectionProxy 				= Proxy.NO_PROXY;
-	private int connectionTimeoutMillis			= 60 * 1000;
-	private int readTimeoutMillis				= 60 * 1000 * 2;
-	private SSLContext sslContext				= null;
-	private HostnameVerifier hostNameVerifier	= null;
-	private final Map<String, String> headers	= new HashMap<String, String>();
+	private Proxy connectionProxy = Proxy.NO_PROXY;
+	
+	private int connectionTimeoutMillis = 60 * 1000;
+	
+	private int readTimeoutMillis = 60 * 1000 * 2;
+	
+	private SSLContext sslContext;
+	
+	private HostnameVerifier hostNameVerifier;
+	
+	private final Map<String, String> headers = new HashMap<String, String>();
 
 	/**
 	 * Creates the {@link JsonRpcHttpClient} bound to the given {@code serviceUrl}.

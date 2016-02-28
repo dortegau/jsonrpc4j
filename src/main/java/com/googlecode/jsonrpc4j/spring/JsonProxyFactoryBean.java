@@ -25,7 +25,6 @@ THE SOFTWARE.
 package com.googlecode.jsonrpc4j.spring;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -46,7 +45,6 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
-import com.googlecode.jsonrpc4j.ReflectionUtil;
 import com.googlecode.jsonrpc4j.spring.objectmapper.ObjectMapperRetriever;
 
 /**
@@ -55,6 +53,8 @@ import com.googlecode.jsonrpc4j.spring.objectmapper.ObjectMapperRetriever;
  *
  */
 public class JsonProxyFactoryBean extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean, FactoryBean<Object>, ApplicationContextAware {
+
+	private static final boolean IS_SINGLETON = true;
 
 	private Object proxyObject;
 	
@@ -105,7 +105,7 @@ public class JsonProxyFactoryBean extends UrlBasedRemoteAccessor implements Meth
 	}
 
 	public boolean isSingleton() {
-		return true;
+		return IS_SINGLETON;
 	}
 	
 	public JsonProxyFactoryBean() {
@@ -145,24 +145,18 @@ public class JsonProxyFactoryBean extends UrlBasedRemoteAccessor implements Meth
 	}
 
 	@Override
-	public Object invoke(MethodInvocation invocation)
-		throws Throwable {
+	public Object invoke(MethodInvocation invocation) throws Throwable {		
+		if (isToStringInvocation(invocation.getMethod())) return buildInvokedServiceToString();
 
-		// handle toString()
-		Method method = invocation.getMethod();
-		if (method.getDeclaringClass() == Object.class && method.getName().equals("toString")) {
-			return proxyObject.getClass().getName() + "@" + System.identityHashCode(proxyObject);
-		}
+		RemoteInvocationHandler remoteInvocationHandler = new RemoteInvocationHandler(jsonRpcHttpClient, extraHttpHeaders, invocation);
+		return remoteInvocationHandler.perform();
+	}
 
-		// get return type
-		Type retType = (invocation.getMethod().getGenericReturnType() != null)
-			? invocation.getMethod().getGenericReturnType()
-			: invocation.getMethod().getReturnType();
+	private String buildInvokedServiceToString() {
+		return proxyObject.getClass().getName() + "@" + System.identityHashCode(proxyObject);
+	}
 
-		// get arguments
-		Object arguments = ReflectionUtil.parseArguments(invocation.getMethod(), invocation.getArguments());
-
-		// invoke it
-		return jsonRpcHttpClient.invoke(invocation.getMethod().getName(), arguments, retType, extraHttpHeaders);
+	private boolean isToStringInvocation(Method method) {
+		return method.getDeclaringClass() == Object.class && method.getName().equals("toString");
 	}
 }
