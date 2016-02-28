@@ -38,10 +38,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * A JSON-RPC request server reads JSON-RPC requests from an
  * input stream and writes responses to an output stream.
- * Supports handlet and servlet requests.
+ * Supports only servlet requests
  */
-public class JsonRpcServer extends JsonRpcBasicServer
-{
+public class JsonRpcServer extends JsonRpcBasicServer {
+	
 	private static final Logger LOGGER = Logger.getLogger(JsonRpcServer.class.getName());
     
 	/**
@@ -53,8 +53,7 @@ public class JsonRpcServer extends JsonRpcBasicServer
 	 * @param handler the {@code handler}
 	 * @param remoteInterface the interface
 	 */
-	public JsonRpcServer(
-		ObjectMapper mapper, Object handler, Class<?> remoteInterface) {
+	public JsonRpcServer(ObjectMapper mapper, Object handler, Class<?> remoteInterface) {
 		super(mapper, handler, remoteInterface);
 	}
 
@@ -98,10 +97,10 @@ public class JsonRpcServer extends JsonRpcBasicServer
 	 * @param response the {@link HttpServletResponse}
 	 * @throws IOException on error
 	 */
-	public void handle(HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
+	public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		
 		if (LOGGER.isLoggable(Level.FINE)) {
-			LOGGER.log(Level.FINE, "Handing HttpServletRequest "+request.getMethod());
+			LOGGER.log(Level.FINE, "Handing HttpServletRequest " + request.getMethod());
 		}
 
 		// set response type

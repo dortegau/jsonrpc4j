@@ -933,7 +933,7 @@ public class JsonRpcBasicServer {
 	 *
 	 * @param backwardsComaptible the backwardsComaptible to set
 	 */
-	public void setBackwardsComaptible(boolean backwardsComaptible) {
+	public void setBackwardsCompatible(boolean backwardsComaptible) {
 		this.backwardsComaptible = backwardsComaptible;
 	}
 
