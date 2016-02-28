@@ -1,9 +1,14 @@
-package com.idealista.jsonrpc4j.spring.objectmapper;
+package com.idealista.jsonrpc4j.objectmapper;
 
 import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Retrieves existing {@link ObjectMapper} from application context by bean name
+ * 
+ * @author dortegau
+ */
 class ByNameObjectMapperContextRetriever implements ObjectMapperContextRetriever {
 
 	private static final String OBJECT_MAPPER_BEAN_NAME = "objectMapper";	

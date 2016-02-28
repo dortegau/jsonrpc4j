@@ -29,11 +29,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.portlet.ResourceRequest;
-import javax.portlet.ResourceResponse;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -91,49 +89,6 @@ public class JsonRpcServer extends JsonRpcBasicServer
 	 */
 	public JsonRpcServer(Object handler) {
 		super(new ObjectMapper(), handler, null);
-	}
-        
-	/**
-	 * Handles a portlet request.
-	 *
-	 * @param request the {@link ResourceRequest}
-	 * @param response the {@link ResourceResponse}
-	 * @throws IOException on error
-	 */
-	public void handle(ResourceRequest request, ResourceResponse response)
-		throws IOException {
-		if (LOGGER.isLoggable(Level.FINE)) {
-			LOGGER.log(Level.FINE, "Handing ResourceRequest "+request.getMethod());
-		}
-
-		// set response type
-		response.setContentType(JSONRPC_RESPONSE_CONTENT_TYPE);
-
-		// setup streams
-		InputStream input 	= null;
-		OutputStream output	= response.getPortletOutputStream();
-
-		// POST
-		if (request.getMethod().equals("POST")) {
-			input = request.getPortletInputStream();
-
-		// GET
-		} else if (request.getMethod().equals("GET")) {
-			input = createInputStream(
-				request.getParameter("method"),
-				request.getParameter("id"),
-				request.getParameter("params"));
-
-		// invalid request
-		} else {
-			throw new IOException(
-				"Invalid request method, only POST and GET is supported");
-		}
-
-		// service the request
-		handle(input, output);
-		//fix to not flush within handle() but outside so http status code can be set
-		output.flush();
 	}
 
 	/**

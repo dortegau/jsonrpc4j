@@ -45,7 +45,7 @@ import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idealista.jsonrpc4j.JsonRpcHttpClient;
 import com.idealista.jsonrpc4j.JsonRpcClient.RequestListener;
-import com.idealista.jsonrpc4j.spring.objectmapper.ObjectMapperRetriever;
+import com.idealista.jsonrpc4j.objectmapper.ObjectMapperRetriever;
 
 /**
  * {@link FactoryBean} for creating a {@link UrlBasedRemoteAccessor}

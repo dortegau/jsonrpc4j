@@ -1,4 +1,4 @@
-package com.idealista.jsonrpc4j.spring.objectmapper;
+package com.idealista.jsonrpc4j.objectmapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -1,4 +1,4 @@
-package com.idealista.jsonrpc4j.spring.objectmapper;
+package com.idealista.jsonrpc4j.objectmapper;
 
 import java.util.logging.Logger;
 
@@ -7,6 +7,11 @@ import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Retrieves existing {@link ObjectMapper} from application context by bean type
+ * 
+ * @author dortegau
+ */
 class ByTypeObjectMapperContextRetriever implements ObjectMapperContextRetriever {
 
 	private static final Logger LOGGER = Logger.getLogger(ObjectMapperRetriever.class.getName());

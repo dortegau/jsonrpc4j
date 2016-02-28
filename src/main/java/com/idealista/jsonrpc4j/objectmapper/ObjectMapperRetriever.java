@@ -1,4 +1,4 @@
-package com.idealista.jsonrpc4j.spring.objectmapper;
+package com.idealista.jsonrpc4j.objectmapper;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,10 +8,10 @@ import org.springframework.context.ApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Retrieves existing Object Mapper in application context or creates new Object
- * Mapper instance otherwise
+ * Retrieves existing {@link ObjectMapper} in application context or creates new {@link ObjectMapper} 
+ * instance otherwise
  * 
- * @author dortega
+ * @author dortegau
  */
 public class ObjectMapperRetriever {
 
