@@ -7,17 +7,14 @@
 
 	<name>JSON-RPC for java</name>
 	<description>Library for using JSON-RPC with Java</description>
-	<url>https://github.com/briandilley/jsonrpc4j</url>
+	<url>https://github.com/dortegau/jsonrpc4j</url>
 
 	<properties>
 		<spring.version>3.1.2.RELEASE</spring.version>
 		<jackson.version>2.5.2</jackson.version>
-		<jdk.version>1.6</jdk.version>
+		<jdk.version>1.7</jdk.version>
 	</properties>
 
-	<!--
-	 | Licenses
-	 +-->
 	<licenses>
 		<license>
 			<name>The MIT License (MIT)</name>
@@ -26,9 +23,6 @@
 		</license>
 	</licenses>
 
-	<!--
-	 | Developers
-	 +-->
 	<developers>
 		<developer>
 			<email>brian.dilley@gmail.com</email>
@@ -37,32 +31,13 @@
 		</developer>
 	</developers>
 
-	<!--
-	 | SCM
-	 +-->
 	<scm>
-		<connection>scm:git:git@github.com:briandilley/jsonrpc4j.git</connection>
-		<url>scm:git:git@github.com:briandilley/jsonrpc4j.git</url>
-		<developerConnection>scm:git:git@github.com:briandilley/jsonrpc4j.git</developerConnection>
+		<connection>scm:git:git@github.com:dortegau/jsonrpc4j.git</connection>
+		<url>scm:git:git@github.com:dortegau/jsonrpc4j.git</url>
+		<developerConnection>scm:git:git@github.com:dortegau/jsonrpc4j.git</developerConnection>
 	</scm>
-	
-	<!--
-	 | Distribution config
-	 +-->
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 
 	<build>
-
-		<!-- resource directories -->
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -75,19 +50,6 @@
 		</testResources>
 
 		<plugins>
-		
-	<plugin>
-	  <groupId>org.sonatype.plugins</groupId>
-	  <artifactId>nexus-staging-maven-plugin</artifactId>
-	  <version>1.6.3</version>
-	  <extensions>true</extensions>
-	  <configuration>
-		<serverId>ossrh</serverId>
-		<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-		<autoReleaseAfterClose>true</autoReleaseAfterClose>
-	  </configuration>
-	</plugin>
-			<!-- compiler plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -97,9 +59,6 @@
 				</configuration>
 			</plugin>
 			
-			<!-- 
-			 | Deploy sources too
-			 +-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -112,16 +71,14 @@
 				</executions>
 			</plugin>
 
-			<!--
-			 | OSGi metadata
-			 +-->
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<configuration>
 					<instructions>
-						<!-- our limited use of javax.servlet.http package is compatible with all versions, not just 3.x,
-						     despite this is the version we currently depend on at build time -->
+						<!-- our limited use of javax.servlet.http package is compatible with 
+							all versions, not just 3.x, despite this is the version we currently depend 
+							on at build time -->
 						<Import-Package>javax.servlet*;version=0.0.0,*</Import-Package>
 					</instructions>
 				</configuration>
@@ -161,104 +118,28 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!--
-			 | GPG
-			 +-->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
-
 	</build>
 
-	<profiles>
-		<profile>
-			<id>shaded-bundle</id>
-			<build>
-				<plugins>
-					<!-- 
-					 | OSGi ready shaded bundle
-					 +-->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-shade-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>shade</goal>
-								</goals>
-								<configuration>
-									<finalName>${artifactId}-${version}-shaded-bundle</finalName>
-									<createDependencyReducedPom>false</createDependencyReducedPom>
-									<artifactSet>
-										<includes>
-											<include>com.fasterxml.jackson.core</include>
-										</includes>
-									</artifactSet>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.felix</groupId>
-						<artifactId>maven-bundle-plugin</artifactId>
-						<extensions>true</extensions>
-						<executions>
-							<execution>
-								<id>bundle-manifest</id>
-								<phase>process-classes</phase>
-								<goals>
-									<goal>manifest</goal>
-								</goals>
-								<configuration>
-									<unpackBundle>true</unpackBundle>
-									<instructions>
-										<Import-Package />
-									</instructions>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 	<dependencies>
-
 		<dependency>
 			<groupId>net.iharder</groupId>
 			<artifactId>base64</artifactId>
 			<version>2.3.8</version>
 		</dependency>
 
-		<!--
-		 | json dependencies
-		 +-->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
- 			<version>${jackson.version}</version>
- 		</dependency>
+			<version>${jackson.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
@@ -266,9 +147,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- 
-		 | servlet\portlet dependencies
-		 +-->
 		<dependency>
 			<groupId>javax.portlet</groupId>
 			<artifactId>portlet-api</artifactId>
@@ -277,60 +155,55 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- 
-		 | spring dependencies
-		 +-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${spring.version}</version>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${spring.version}</version>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>${spring.version}</version>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
-		
-		<!--
-		 | apache http client
-		 +-->
+
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.4</version>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpcore-nio</artifactId>
 			<version>4.2.1</version>
 			<optional>true</optional>
 		</dependency>
-		
 
-		<!-- 
-		 | Servlet
-		 +-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -338,27 +211,27 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- 
-		 | test dependencies
-		 +-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.jmock</groupId>
 			<artifactId>jmock-junit4</artifactId>
 			<version>2.5.1</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.jmock</groupId>
 			<artifactId>jmock</artifactId>
 			<version>2.5.1</version>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
@@ -371,6 +244,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
@@ -383,6 +257,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -390,6 +265,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 </project>
-
