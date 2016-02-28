@@ -34,85 +34,116 @@ import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
-import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
-import com.googlecode.jsonrpc4j.ReflectionUtil;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.remoting.support.UrlBasedRemoteAccessor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
+import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
+import com.googlecode.jsonrpc4j.ReflectionUtil;
+import com.googlecode.jsonrpc4j.spring.objectmapper.ObjectMapperRetriever;
+
 /**
  * {@link FactoryBean} for creating a {@link UrlBasedRemoteAccessor}
  * (aka consumer) for accessing an HTTP based JSON-RPC service.
  *
  */
-public class JsonProxyFactoryBean
-	extends UrlBasedRemoteAccessor
-	implements MethodInterceptor,
-	InitializingBean,
-	FactoryBean<Object>,
-	ApplicationContextAware {
+public class JsonProxyFactoryBean extends UrlBasedRemoteAccessor implements MethodInterceptor, InitializingBean, FactoryBean<Object>, ApplicationContextAware {
 
-	private Object				proxyObject			= null;
-	private RequestListener		requestListener		= null;
-	private ObjectMapper		objectMapper		= null;
-	private JsonRpcHttpClient	jsonRpcHttpClient	= null;
-	private Map<String, String>	extraHttpHeaders	= new HashMap<String, String>();
+	private Object proxyObject;
+	
+	private RequestListener requestListener;
+	
+	private ObjectMapper objectMapper;
+	
+	private JsonRpcHttpClient jsonRpcHttpClient;
+	
+	private Map<String, String> extraHttpHeaders;
 
-	private SSLContext sslContext 				= null;
-	private HostnameVerifier hostNameVerifier 	= null;
+	private SSLContext sslContext;
+	
+	private HostnameVerifier hostNameVerifier;
 
+	private ApplicationContext applicationContext;
 
-	private ApplicationContext	applicationContext;
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
+
+	public void setExtraHttpHeaders(Map<String, String> extraHttpHeaders) {
+		this.extraHttpHeaders = extraHttpHeaders;
+	}
+
+	public void setRequestListener(RequestListener requestListener) {
+		this.requestListener = requestListener;
+	}
+
+    public void setSslContext(SSLContext sslContext) {
+        this.sslContext = sslContext;
+    }
+
+    public void setHostNameVerifier(HostnameVerifier hostNameVerifier)   {
+        this.hostNameVerifier = hostNameVerifier;
+    }
+    
+	public Object getObject() {
+		return proxyObject;
+	}
+	
+	public Class<?> getObjectType() {
+		return getServiceInterface();
+	}
+
+	public boolean isSingleton() {
+		return true;
+	}
+	
+	public JsonProxyFactoryBean() {
+		this.extraHttpHeaders = new HashMap<String, String>();
+	}
+
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
-		// create proxy
-		proxyObject = ProxyFactory.getProxy(getServiceInterface(), this);
+		this.proxyObject = retrieveProxyObject();
+		this.objectMapper = retrieveObjectMapper();
+		
+		this.jsonRpcHttpClient = buildJsonRpcHttpClient();
+	}
 
-		// find the ObjectMapper
-		if (objectMapper == null
-			&& applicationContext != null
-			&& applicationContext.containsBean("objectMapper")) {
-			objectMapper = (ObjectMapper) applicationContext.getBean("objectMapper");
-		}
-		if (objectMapper == null && applicationContext != null) {
-			try {
-				objectMapper = BeanFactoryUtils
-					.beanOfTypeIncludingAncestors(applicationContext, ObjectMapper.class);
-			} catch (Exception e) { /* no-op */ }
-		}
-		if (objectMapper==null) {
-			objectMapper = new ObjectMapper();
-		}
-
-		// create JsonRpcHttpClient
+	private JsonRpcHttpClient buildJsonRpcHttpClient() {
 		try {
-			jsonRpcHttpClient = new JsonRpcHttpClient(objectMapper, new URL(getServiceUrl()), extraHttpHeaders);
+			JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(objectMapper, new URL(getServiceUrl()), extraHttpHeaders);
 			jsonRpcHttpClient.setRequestListener(requestListener);
             jsonRpcHttpClient.setSslContext(sslContext);
             jsonRpcHttpClient.setHostNameVerifier(hostNameVerifier);
+            
+            return jsonRpcHttpClient;
 		} catch (MalformedURLException mue) {
 			throw new RuntimeException(mue);
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@SuppressWarnings("unchecked")
+	private Object retrieveProxyObject() {
+		return ProxyFactory.getProxy(getServiceInterface(), this);
+	}
+
+	private ObjectMapper retrieveObjectMapper() {
+		ObjectMapperRetriever objectMapperRetriever = new ObjectMapperRetriever(applicationContext);
+		return objectMapperRetriever.retrieve();
+	}
+
 	@Override
 	public Object invoke(MethodInvocation invocation)
 		throws Throwable {
@@ -129,81 +160,9 @@ public class JsonProxyFactoryBean
 			: invocation.getMethod().getReturnType();
 
 		// get arguments
-		Object arguments = ReflectionUtil.parseArguments(
-invocation.getMethod(), invocation.getArguments());
+		Object arguments = ReflectionUtil.parseArguments(invocation.getMethod(), invocation.getArguments());
 
 		// invoke it
-		return jsonRpcHttpClient.invoke(
-			invocation.getMethod().getName(),
-			arguments,
-			retType, extraHttpHeaders);
+		return jsonRpcHttpClient.invoke(invocation.getMethod().getName(), arguments, retType, extraHttpHeaders);
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Object getObject() {
-		return proxyObject;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Class<?> getObjectType() {
-		return getServiceInterface();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
-	/**
-	 * @param objectMapper the objectMapper to set
-	 */
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
-
-	/**
-	 * @param extraHttpHeaders the extraHttpHeaders to set
-	 */
-	public void setExtraHttpHeaders(Map<String, String> extraHttpHeaders) {
-		this.extraHttpHeaders = extraHttpHeaders;
-	}
-
-	/**
-	 * @param requestListener the requestListener to set
-	 */
-	public void setRequestListener(RequestListener requestListener) {
-		this.requestListener = requestListener;
-	}
-
-    /**
-     * @param sslContext SSL context to pass to JsonRpcClient
-     */
-    public void setSslContext(SSLContext sslContext) {
-        this.sslContext = sslContext;
-    }
-
-	/**
-	 * @param hostNameVerifier the hostNameVerifier to pass to JsonRpcClient
-	 */
-    public void setHostNameVerifier(HostnameVerifier hostNameVerifier)   {
-        this.hostNameVerifier = hostNameVerifier;
-    }
-
 }
