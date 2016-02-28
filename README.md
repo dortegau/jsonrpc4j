@@ -118,7 +118,7 @@ Configure your service in spring as you would any other RemoteExporter:
     <bean id="userService" class="com.mycompany.UserServiceImpl">
     </bean>
 
-    <bean name="/UserService.json" class="com.googlecode.jsonrpc4j.spring.JsonServiceExporter">
+    <bean name="/UserService.json" class="com.idealista.jsonrpc4j.spring.JsonServiceExporter">
         <property name="service" ref="userService"/>
         <property name="serviceInterface" value="com.mycompany.UserService"/>
     </bean>
@@ -137,7 +137,7 @@ be accessed by any JSON-RPC capable client, including the `JsonProxyFactoryBean`
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean  class="com.googlecode.jsonrpc4j.spring.JsonProxyFactoryBean">
+    <bean  class="com.idealista.jsonrpc4j.spring.JsonProxyFactoryBean">
         <property name="serviceUrl" value="http://example.com/UserService.json"/>
         <property name="serviceInterface" value="com.mycompany.UserService"/>
     </bean>
@@ -197,7 +197,7 @@ and use the following configuration to allow spring to find it:
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-  <bean class="com.googlecode.jsonrpc4j.spring.AutoJsonRpcServiceExporter"/>
+  <bean class="com.idealista.jsonrpc4j.spring.AutoJsonRpcServiceExporter"/>
 
   <bean class="com.mycompany.MyServiceImpl" />
 
@@ -211,7 +211,7 @@ Configuring a client is just as easy:
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-  <bean class="com.googlecode.jsonrpc4j.spring.AutoJsonRpcClientProxyCreator">
+  <bean class="com.idealista.jsonrpc4j.spring.AutoJsonRpcClientProxyCreator">
     <property name="baseUrl" value="http://hostname/api/" />
     <property name="scanPackage" value="com.mycompany.services" />
   </bean>
@@ -344,7 +344,7 @@ streamServer.stop();
 Of course, this is all possible in the Spring Framework as well:
 
 ```xml
-    <bean id="streamingCompositeService" class="com.googlecode.jsonrpc4j.spring.CompositeJsonStreamServiceExporter">
+    <bean id="streamingCompositeService" class="com.idealista.jsonrpc4j.spring.CompositeJsonStreamServiceExporter">
         <!-- can be an IP, hostname or omitted to listen on all available devices -->
         <property name="hostName" value="localhost"/>
         <property name="port" value="6420"/>
