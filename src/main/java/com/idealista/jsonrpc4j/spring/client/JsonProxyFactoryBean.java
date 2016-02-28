@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
 
-package com.idealista.jsonrpc4j.spring;
+package com.idealista.jsonrpc4j.spring.client;
 
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;

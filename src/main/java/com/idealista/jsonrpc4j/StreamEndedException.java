@@ -31,8 +31,7 @@ import java.io.IOException;
  *
  */
 @SuppressWarnings("serial")
-public class StreamEndedException
-		extends IOException {
+public class StreamEndedException extends IOException {
 
 	/**
 	 * 

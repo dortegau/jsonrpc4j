@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.idealista.jsonrpc4j.spring.JsonServiceExporter;
+import com.idealista.jsonrpc4j.spring.server.JsonServiceExporter;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:serverApplicationContext.xml")

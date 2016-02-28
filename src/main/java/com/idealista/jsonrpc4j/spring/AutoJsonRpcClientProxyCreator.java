@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idealista.jsonrpc4j.JsonRpcService;
+import com.idealista.jsonrpc4j.spring.client.JsonProxyFactoryBean;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;

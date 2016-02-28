@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
 
-package com.idealista.jsonrpc4j.spring;
+package com.idealista.jsonrpc4j.spring.server;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -31,7 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -42,6 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idealista.jsonrpc4j.ErrorResolver;
 import com.idealista.jsonrpc4j.InvocationListener;
 import com.idealista.jsonrpc4j.JsonRpcServer;
+import com.idealista.jsonrpc4j.objectmapper.ObjectMapperRetriever;
 
 /**
  * {@link RemoteExporter} that exports services using Json
@@ -70,30 +70,52 @@ public class JsonServiceExporter extends RemoteExporter implements InitializingB
 	
 	private boolean allowExtraParams = false;
 	
-	private boolean allowLessParams = false;		
+	private boolean allowLessParams = false;
+	
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+	}
+
+	public void setErrorResolver(ErrorResolver errorResolver) {
+		this.errorResolver = errorResolver;
+	}
+
+	public void setBackwardsComaptible(boolean backwardsCompatible) {
+		this.backwardsCompatible = backwardsCompatible;
+	}
+	
+	public void setRethrowExceptions(boolean rethrowExceptions) {
+		this.rethrowExceptions = rethrowExceptions;
+	}
+	
+	public void setAllowExtraParams(boolean allowExtraParams) {
+		this.allowExtraParams = allowExtraParams;
+	}
+	
+	public void setAllowLessParams(boolean allowLessParams) {
+		this.allowLessParams = allowLessParams;
+	}
+	
+	public void setExceptionLogLevel(Level exceptionLogLevel) {
+		this.exceptionLogLevel = exceptionLogLevel;
+	}
+	
+    public void setInvocationListener(InvocationListener invocationListener) {
+        this.invocationListener = invocationListener;
+    }
+
 	public void afterPropertiesSet() throws Exception {
+		this.objectMapper = retrieveObjectMapper();
+		this.jsonRpcServer = buildJsonRpcServer();
+	}
 
-		// find the ObjectMapper
-		if (objectMapper == null
-			&& applicationContext != null
-			&& applicationContext.containsBean("objectMapper")) {
-			objectMapper = (ObjectMapper) applicationContext.getBean("objectMapper");
-		}
-		if (objectMapper == null && applicationContext != null) {
-			try {
-				objectMapper = (ObjectMapper)BeanFactoryUtils
-					.beanOfTypeIncludingAncestors(applicationContext, ObjectMapper.class);
-			} catch (Exception e) { /* no-op */ }
-		}
-		if (objectMapper==null) {
-			objectMapper = new ObjectMapper();
-		}
-
-		jsonRpcServer = new JsonRpcServer(objectMapper, getProxyForService(), getServiceInterface());
+	private JsonRpcServer buildJsonRpcServer() {
+		JsonRpcServer jsonRpcServer = new JsonRpcServer(objectMapper, getProxyForService(), getServiceInterface());
+		
 		jsonRpcServer.setErrorResolver(errorResolver);
 		jsonRpcServer.setBackwardsCompatible(backwardsCompatible);
 		jsonRpcServer.setRethrowExceptions(rethrowExceptions);
@@ -101,95 +123,17 @@ public class JsonServiceExporter extends RemoteExporter implements InitializingB
 		jsonRpcServer.setAllowLessParams(allowLessParams);
 		jsonRpcServer.setExceptionLogLevel(exceptionLogLevel);
         jsonRpcServer.setInvocationListener(invocationListener);
+        
+        return jsonRpcServer;
+	}
+	
+	private ObjectMapper retrieveObjectMapper() {
+		ObjectMapperRetriever objectMapperRetriever = new ObjectMapperRetriever(applicationContext);
+		return objectMapperRetriever.retrieve();
 	}
 	
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		jsonRpcServer.handle(request, response);
 		response.getOutputStream().flush();
 	}
-
-	/**
-	 * @return the objectMapper
-	 */
-	protected ObjectMapper getObjectMapper() {
-		return objectMapper;
-	}
-
-	/**
-	 * @return the jsonRpcServer
-	 */
-	protected JsonRpcServer getJsonRpcServer() {
-		return jsonRpcServer;
-	}
-
-	/**
-	 * @return the applicationContext
-	 */
-	protected ApplicationContext getApplicationContext() {
-		return applicationContext;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
-	/**
-	 * @param objectMapper the objectMapper to set
-	 */
-	public void setObjectMapper(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
-
-	/**
-	 * @param errorResolver the errorResolver to set
-	 */
-	public void setErrorResolver(ErrorResolver errorResolver) {
-		this.errorResolver = errorResolver;
-	}
-
-	/**
-	 * @param backwardsCompatible the backwardsComaptible to set
-	 */
-	public void setBackwardsComaptible(boolean backwardsCompatible) {
-		this.backwardsCompatible = backwardsCompatible;
-	}
-
-	/**
-	 * @param rethrowExceptions the rethrowExceptions to set
-	 */
-	public void setRethrowExceptions(boolean rethrowExceptions) {
-		this.rethrowExceptions = rethrowExceptions;
-	}
-
-	/**
-	 * @param allowExtraParams the allowExtraParams to set
-	 */
-	public void setAllowExtraParams(boolean allowExtraParams) {
-		this.allowExtraParams = allowExtraParams;
-	}
-
-	/**
-	 * @param allowLessParams the allowLessParams to set
-	 */
-	public void setAllowLessParams(boolean allowLessParams) {
-		this.allowLessParams = allowLessParams;
-	}
-
-	/**
-	 * @param exceptionLogLevel the exceptionLogLevel to set
-	 */
-	public void setExceptionLogLevel(Level exceptionLogLevel) {
-		this.exceptionLogLevel = exceptionLogLevel;
-	}
-
-    /**
-     * @param invocationListener the invocationListener to set
-     */
-    public void setInvocationListener(InvocationListener invocationListener) {
-        this.invocationListener = invocationListener;
-    }
-
 }

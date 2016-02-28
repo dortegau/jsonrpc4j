@@ -1,4 +1,4 @@
-package com.idealista.jsonrpc4j.spring;
+package com.idealista.jsonrpc4j.spring.client;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;

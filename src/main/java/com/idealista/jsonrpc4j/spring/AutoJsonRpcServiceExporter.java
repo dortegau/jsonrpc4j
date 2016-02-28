@@ -46,6 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.idealista.jsonrpc4j.ErrorResolver;
 import com.idealista.jsonrpc4j.InvocationListener;
 import com.idealista.jsonrpc4j.JsonRpcService;
+import com.idealista.jsonrpc4j.spring.server.JsonServiceExporter;
 
 /**
  * Auto exports {@link JsonRpcService} annotated beans as JSON-RPC services.
